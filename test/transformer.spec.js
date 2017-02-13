@@ -6,6 +6,7 @@ var chai = require( 'chai' );
 var chaiAsPromised = require( 'chai-as-promised' );
 var expect = chai.expect;
 var fs = require( 'fs' );
+var DOMParser = require( 'xmldom' ).DOMParser;
 var transformer = require( '../src/transformer' );
 
 chai.use( chaiAsPromised );
@@ -428,6 +429,62 @@ describe( 'transformer', function() {
 
         it( 'does not add it if it contains /meta/instanceID in the OpenRosa namespace', function() {
             return expect( result2 ).to.eventually.have.property( 'model' ).and.to.not.contain( '<instanceID/>' );
+        } );
+    } );
+
+    describe( 'for forms that contain unsupported attributes', function() {
+        var xform = fs.readFileSync( './test/forms/bad-external.xml' );
+        var parser = new DOMParser();
+
+        it( 'does nothing special by default', function() {
+            var result = transformer.transform( {
+                xform: xform
+            } );
+            return result.then( function( res ) {
+                var doc = parser.parseFromString( res.model, 'text/xml' );
+                return Promise.all( [
+                    expect( doc ).to.be.an( 'object' ),
+                    expect( doc.getElementsByTagName( 'instance' ) ).to.have.length( 2 ),
+                    expect( doc.getElementById( 'existing' ) ).to.not.be.null,
+                    expect( doc.getElementById( 'existing' ).getAttribute( 'src' ) ).to.equal( 'jr://file/existing.xml' ),
+                    expect( doc.getElementById( 'counties' ) ).to.be.null,
+                    expect( doc.getElementById( 'cities' ) ).to.be.null
+                ] );
+            } );
+        } );
+
+        it( 'adds referred instances (for third party usage) if instanceCorrection:true and if necessary', function() {
+            var result = transformer.transform( {
+                xform: xform,
+                correctInstances: true
+            } );
+            return result.then( function( res ) {
+                var doc = parser.parseFromString( res.model, 'text/xml' );
+                return Promise.all( [
+                    expect( doc ).to.be.an( 'object' ),
+                    expect( doc.getElementsByTagName( 'instance' ) ).to.have.length( 4 ),
+                    expect( doc.getElementById( 'existing' ) ).to.not.be.null,
+                    expect( doc.getElementById( 'existing' ).getAttribute( 'src' ) ).to.equal( 'jr://file/existing.xml' ),
+                    expect( doc.getElementById( 'counties' ) ).to.not.be.null,
+                    expect( doc.getElementById( 'counties' ).getAttribute( 'src' ) ).to.equal( 'jr://mystery' ),
+                    expect( doc.getElementById( 'cities' ) ).to.not.be.null,
+                    expect( doc.getElementById( 'cities' ).getAttribute( 'src' ) ).to.equal( 'jr://mystery' ),
+                ] );
+            } );
+        } );
+
+        it( 'does NOT add referred instances if instanceCorrection:true if not necessary', function() {
+            var result = transformer.transform( {
+                xform: fs.readFileSync( './test/forms/widgets.xml' ),
+                correctInstances: true
+            } );
+            return result.then( function( res ) {
+                var doc = parser.parseFromString( res.model, 'text/xml' );
+                return Promise.all( [
+                    expect( doc ).to.be.an( 'object' ),
+                    expect( doc.getElementById( 'counties' ) ).to.be.null
+                ] );
+            } );
         } );
     } );
 

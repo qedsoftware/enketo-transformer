@@ -9,8 +9,11 @@ var libxmljs = libxslt.libxmljs;
 var language = require( './language' );
 var markdown = require( './markdown' );
 var sheets = require( 'enketo-xslt' );
-var openRosaNamespace = 'http://openrosa.org/xforms';
-var xformsNamespace = 'http://www.w3.org/2002/xforms';
+var NAMESPACES = {
+    xmlns: 'http://www.w3.org/2002/xforms',
+    orx: 'http://openrosa.org/xforms',
+    h: 'http://www.w3.org/1999/xhtml'
+};
 var version = _getVersion();
 
 /**
@@ -28,7 +31,9 @@ function transform( survey ) {
         .then( function( doc ) {
             xformDoc = doc;
 
-            return _transform( sheets.xslForm, xformDoc );
+            return _transform( sheets.xslForm, xformDoc, {
+                q: survey.forgive
+            } );
         } )
         .then( function( htmlDoc ) {
             htmlDoc = _replaceTheme( htmlDoc, survey.theme );
@@ -45,6 +50,9 @@ function transform( survey ) {
         .then( function( xmlDoc ) {
             xmlDoc = _replaceMediaSources( xmlDoc, survey.media );
             xmlDoc = _addInstanceIdNodeIfMissing( xmlDoc );
+            if ( survey.forgive ) {
+                xmlDoc = _addInstanceNodes( xmlDoc, xformDoc, survey.forgive );
+            }
             survey.model = xmlDoc.root().get( '*' ).toString( false );
             survey.transformerVersion = pkg.version;
 
@@ -61,13 +69,14 @@ function transform( survey ) {
  * @param  {[type]} xmlDoc libxmljs object of XML document
  * @return {Promise}       libxmljs result document object 
  */
-function _transform( xslStr, xmlDoc ) {
+function _transform( xslStr, xmlDoc, opts ) {
+    opts = typeof opts !== 'object' ? {} : opts;
     return new Promise( function( resolve, reject ) {
         libxslt.parse( xslStr, function( error, stylesheet ) {
             if ( error ) {
                 reject( error );
             } else {
-                stylesheet.apply( xmlDoc, function( error, result ) {
+                stylesheet.apply( xmlDoc, opts, function( error, result ) {
                     if ( error ) {
                         reject( error );
                     } else {
@@ -254,17 +263,13 @@ function _getLanguageSampleText( doc, lang ) {
  * @param {[type]} doc libxmljs object
  */
 function _addInstanceIdNodeIfMissing( doc ) {
-    var namespaces = {
-        xmlns: xformsNamespace,
-        orx: openRosaNamespace
-    };
     var xformsPath = '/xmlns:root/xmlns:model/xmlns:instance/*/xmlns:meta/xmlns:instanceID';
     var openrosaPath = '/xmlns:root/xmlns:model/xmlns:instance/*/orx:meta/orx:instanceID';
-    var instanceIdEl = doc.get( xformsPath + ' | ' + openrosaPath, namespaces );
+    var instanceIdEl = doc.get( xformsPath + ' | ' + openrosaPath, NAMESPACES );
 
     if ( !instanceIdEl ) {
-        var rootEl = doc.get( '/xmlns:root/xmlns:model/xmlns:instance/*', namespaces );
-        var metaEl = doc.get( '/xmlns:root/xmlns:model/xmlns:instance/*/xmlns:meta', namespaces );
+        var rootEl = doc.get( '/xmlns:root/xmlns:model/xmlns:instance/*', NAMESPACES );
+        var metaEl = doc.get( '/xmlns:root/xmlns:model/xmlns:instance/*/xmlns:meta', NAMESPACES );
 
         if ( metaEl ) {
             metaEl
@@ -277,6 +282,36 @@ function _addInstanceIdNodeIfMissing( doc ) {
     }
 
     return doc;
+}
+
+
+/**
+ * Makes an attempt to correct the model of non-compliant XForms
+ * @param {[type]} doc libxmljs object
+ */
+function _addInstanceNodes( xmlDoc, xformDoc, attr ) {
+    var model = xmlDoc.get( '/xmlns:root/xmlns:model', NAMESPACES );
+    var instanceIds = xformDoc.find( '/h:html/h:body//xmlns:input[@' + attr + ']/@' + attr, NAMESPACES ).map( function( el ) {
+        // This is for pyxform-produced forms only, so need to over-engineer 
+        // the detection to work for all edge cases.
+        var match = el.value().match( /^instance\('([^\)]+)'\)/ );
+        return match && match.length ? match[ 1 ] : null;
+    } );
+
+    if ( model && instanceIds && instanceIds.length ) {
+        instanceIds.forEach( function( id ) {
+            if ( id && !model.get( '//xmlns:instance[@id="' + id + '"]', NAMESPACES ) ) {
+                model
+                    .node( 'instance' )
+                    .namespace( NAMESPACES.xmlns )
+                    .attr( {
+                        id: id,
+                        src: 'jr://mystery'
+                    } );
+            }
+        } );
+    }
+    return xmlDoc;
 }
 
 /**
