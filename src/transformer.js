@@ -306,7 +306,7 @@ function _addInstanceNodes( xmlDoc, xformDoc, attr ) {
                     .namespace( NAMESPACES.xmlns )
                     .attr( {
                         id: id,
-                        src: 'jr://mystery'
+                        src: 'jr://file-csv/list_name/' + id + '/itemsets.csv'
                     } );
             }
         } );

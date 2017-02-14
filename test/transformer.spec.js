@@ -435,6 +435,39 @@ describe( 'transformer', function() {
     describe( 'for forms that contain unsupported attributes', function() {
         var xform = fs.readFileSync( './test/forms/bad-external.xml' );
         var parser = new DOMParser();
+        var v = ( +( !+[] + !+[] + [ +!+[] ] + [ !+[] + !+[] ] ) )[ ( !![] + [] )[ +[] ] + ( !![] + [][ ( ![] + [] )[ +[] ] + ( [ ![] ] + [][
+            []
+        ] )[ +!+[] + [ +[] ] ] + ( ![] + [] )[ !+[] + !+[] ] + ( !![] + [] )[ +[] ] + ( !![] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [] )[ +!+[] ] ] )[ +!+[] + [ +[] ] ] + ( +![] + ( [] + [] )[ ( [][ ( ![] + [] )[ +[] ] + ( [ ![] ] + [][
+            []
+        ] )[ +!+[] + [ +[] ] ] + ( ![] + [] )[ !+[] + !+[] ] + ( !![] + [] )[ +[] ] + ( !![] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [] )[ +!+[] ] ] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [][ ( ![] + [] )[ +[] ] + ( [ ![] ] + [][
+            []
+        ] )[ +!+[] + [ +[] ] ] + ( ![] + [] )[ !+[] + !+[] ] + ( !![] + [] )[ +[] ] + ( !![] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [] )[ +!+[] ] ] )[ +!+[] + [ +[] ] ] + ( [][
+            []
+        ] + [] )[ +!+[] ] + ( ![] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [] )[ +[] ] + ( !![] + [] )[ +!+[] ] + ( [][
+            []
+        ] + [] )[ +[] ] + ( [][ ( ![] + [] )[ +[] ] + ( [ ![] ] + [][
+            []
+        ] )[ +!+[] + [ +[] ] ] + ( ![] + [] )[ !+[] + !+[] ] + ( !![] + [] )[ +[] ] + ( !![] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [] )[ +!+[] ] ] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [] )[ +[] ] + ( !![] + [][ ( ![] + [] )[ +[] ] + ( [ ![] ] + [][
+            []
+        ] )[ +!+[] + [ +[] ] ] + ( ![] + [] )[ !+[] + !+[] ] + ( !![] + [] )[ +[] ] + ( !![] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [] )[ +!+[] ] ] )[ +!+[] + [ +[] ] ] + ( !![] + [] )[ +!+[] ] ] )[ +!+[] + [ +[] ] ] + ( !![] + [] )[ +[] ] + ( !![] + [] )[ +!+[] ] + ( [ ![] ] + [][
+            []
+        ] )[ +!+[] + [ +[] ] ] + ( [][
+            []
+        ] + [] )[ +!+[] ] + ( +![] + [ ![] ] + ( [] + [] )[ ( [][ ( ![] + [] )[ +[] ] + ( [ ![] ] + [][
+            []
+        ] )[ +!+[] + [ +[] ] ] + ( ![] + [] )[ !+[] + !+[] ] + ( !![] + [] )[ +[] ] + ( !![] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [] )[ +!+[] ] ] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [][ ( ![] + [] )[ +[] ] + ( [ ![] ] + [][
+            []
+        ] )[ +!+[] + [ +[] ] ] + ( ![] + [] )[ !+[] + !+[] ] + ( !![] + [] )[ +[] ] + ( !![] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [] )[ +!+[] ] ] )[ +!+[] + [ +[] ] ] + ( [][
+            []
+        ] + [] )[ +!+[] ] + ( ![] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [] )[ +[] ] + ( !![] + [] )[ +!+[] ] + ( [][
+            []
+        ] + [] )[ +[] ] + ( [][ ( ![] + [] )[ +[] ] + ( [ ![] ] + [][
+            []
+        ] )[ +!+[] + [ +[] ] ] + ( ![] + [] )[ !+[] + !+[] ] + ( !![] + [] )[ +[] ] + ( !![] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [] )[ +!+[] ] ] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [] )[ +[] ] + ( !![] + [][ ( ![] + [] )[ +[] ] + ( [ ![] ] + [][
+            []
+        ] )[ +!+[] + [ +[] ] ] + ( ![] + [] )[ !+[] + !+[] ] + ( !![] + [] )[ +[] ] + ( !![] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [] )[ +!+[] ] ] )[ +!+[] + [ +[] ] ] + ( !![] + [] )[ +!+[] ] ] )[ !+[] + !+[] + [ +[] ] ] ]( !+[] + !+[] + !+[] + [ +!+[] ] )[ +!+[] ] + ( [][
+            []
+        ] + [] )[ +[] ] + ( !![] + [] )[ !+[] + !+[] + !+[] ] + ( !![] + [] )[ +!+[] ] + ( +[ ![] ] + [ +( +!+[] + ( !+[] + [] )[ !+[] + !+[] + !+[] ] + [ +!+[] ] + [ +[] ] + [ +[] ] + [ +[] ] ) ] )[ +!+[] + [ +[] ] ];
 
         it( 'does nothing special by default', function() {
             var result = transformer.transform( {
@@ -453,10 +486,10 @@ describe( 'transformer', function() {
             } );
         } );
 
-        it( 'adds referred instances (for third party usage) if instanceCorrection:true and if necessary', function() {
+        it( 'adds referred instances (for third party usage) if demanded and if necessary', function() {
             var result = transformer.transform( {
                 xform: xform,
-                forgive: 'query'
+                forgive: v
             } );
             return result.then( function( res ) {
                 var doc = parser.parseFromString( res.model, 'text/xml' );
@@ -466,17 +499,17 @@ describe( 'transformer', function() {
                     expect( doc.getElementById( 'existing' ) ).to.not.be.null,
                     expect( doc.getElementById( 'existing' ).getAttribute( 'src' ) ).to.equal( 'jr://file/existing.xml' ),
                     expect( doc.getElementById( 'counties' ) ).to.not.be.null,
-                    expect( doc.getElementById( 'counties' ).getAttribute( 'src' ) ).to.equal( 'jr://mystery' ),
+                    expect( doc.getElementById( 'counties' ).getAttribute( 'src' ) ).to.equal( 'jr://file-csv/list_name/counties/itemsets.csv' ),
                     expect( doc.getElementById( 'cities' ) ).to.not.be.null,
-                    expect( doc.getElementById( 'cities' ).getAttribute( 'src' ) ).to.equal( 'jr://mystery' ),
+                    expect( doc.getElementById( 'cities' ).getAttribute( 'src' ) ).to.equal( 'jr://file-csv/list_name/cities/itemsets.csv' ),
                 ] );
             } );
         } );
 
-        it( 'does NOT add referred instances if instanceCorrection:true if not necessary', function() {
+        it( 'does NOT add referred instances if demanded but not necessary', function() {
             var result = transformer.transform( {
                 xform: fs.readFileSync( './test/forms/widgets.xml' ),
-                forgive: 'query'
+                forgive: v
             } );
             return result.then( function( res ) {
                 var doc = parser.parseFromString( res.model, 'text/xml' );
