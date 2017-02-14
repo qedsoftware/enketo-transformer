@@ -456,7 +456,7 @@ describe( 'transformer', function() {
         it( 'adds referred instances (for third party usage) if instanceCorrection:true and if necessary', function() {
             var result = transformer.transform( {
                 xform: xform,
-                correctInstances: true
+                forgive: 'query'
             } );
             return result.then( function( res ) {
                 var doc = parser.parseFromString( res.model, 'text/xml' );
@@ -476,7 +476,7 @@ describe( 'transformer', function() {
         it( 'does NOT add referred instances if instanceCorrection:true if not necessary', function() {
             var result = transformer.transform( {
                 xform: fs.readFileSync( './test/forms/widgets.xml' ),
-                correctInstances: true
+                forgive: 'query'
             } );
             return result.then( function( res ) {
                 var doc = parser.parseFromString( res.model, 'text/xml' );
