@@ -437,11 +437,7 @@ describe( 'transformer', function() {
         var parser = new DOMParser();
         var preprocess = function( doc ) {
             var libxmljs = this;
-            var NAMESPACES = {
-                xmlns: 'http://www.w3.org/2002/xforms',
-                orx: 'http://openrosa.org/xforms',
-                h: 'http://www.w3.org/1999/xhtml'
-            };
+            var NAMESPACES = transformer.NAMESPACES;
             var model = doc.get( '/h:html/h:head/xmlns:model', NAMESPACES );
 
             if ( !model ) {

@@ -30,7 +30,6 @@ function transform( survey ) {
     return _parseXml( survey.xform )
         .then( function( doc ) {
             if ( typeof survey.preprocess === 'function' ) {
-                console.log( 'preprocessing' );
                 doc = survey.preprocess.call( libxmljs, doc );
             }
             return doc;
@@ -371,5 +370,6 @@ function _md5( message ) {
 
 module.exports = {
     transform: transform,
-    version: version
+    version: version,
+    NAMESPACES: NAMESPACES
 };
