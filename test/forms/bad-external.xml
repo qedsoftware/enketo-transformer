@@ -76,8 +76,9 @@
     <input query="instance('cities')/root/item[state= /select_one_external/state  and county= /select_one_external/county ]" ref="/select_one_external/city">
       <label ref="jr:itext('/select_one_external/city:label')"/>
     </input>
-    <input query="instance('cities')/root/item[state= /select_one_external/state  and county= /select_one_external/county ]" ref="/select_one_external/city2">
+    <input appearance="minimal" query="instance('cities')/root/item[state= /select_one_external/state  and county= /select_one_external/county ]" ref="/select_one_external/city2">
       <label ref="jr:itext('/select_one_external/city:label')"/>
+      <hint>hint</hint>
     </input>
     <input query="/root/item[state= /select_one_external/state  and county= /select_one_external/county ]" ref="/select_one_external/error">
       <label ref="jr:itext('/select_one_external/city:label')"/>

@@ -29,11 +29,15 @@ function transform( survey ) {
 
     return _parseXml( survey.xform )
         .then( function( doc ) {
+            if ( typeof survey.preprocess === 'function' ) {
+                doc = survey.preprocess.call( libxmljs, doc );
+            }
+            return doc;
+        } )
+        .then( function( doc ) {
             xformDoc = doc;
 
-            return _transform( sheets.xslForm, xformDoc, {
-                q: survey.forgive
-            } );
+            return _transform( sheets.xslForm, xformDoc );
         } )
         .then( function( htmlDoc ) {
             htmlDoc = _replaceTheme( htmlDoc, survey.theme );
@@ -50,9 +54,6 @@ function transform( survey ) {
         .then( function( xmlDoc ) {
             xmlDoc = _replaceMediaSources( xmlDoc, survey.media );
             xmlDoc = _addInstanceIdNodeIfMissing( xmlDoc );
-            if ( survey.forgive ) {
-                xmlDoc = _addInstanceNodes( xmlDoc, xformDoc, survey.forgive );
-            }
             survey.model = xmlDoc.root().get( '*' ).toString( false );
             survey.transformerVersion = pkg.version;
 
@@ -282,36 +283,6 @@ function _addInstanceIdNodeIfMissing( doc ) {
     }
 
     return doc;
-}
-
-
-/**
- * Makes an attempt to correct the model of non-compliant XForms
- * @param {[type]} doc libxmljs object
- */
-function _addInstanceNodes( xmlDoc, xformDoc, attr ) {
-    var model = xmlDoc.get( '/xmlns:root/xmlns:model', NAMESPACES );
-    var instanceIds = xformDoc.find( '/h:html/h:body//xmlns:input[@' + attr + ']/@' + attr, NAMESPACES ).map( function( el ) {
-        // This is for pyxform-produced forms only, so need to over-engineer 
-        // the detection to work for all edge cases.
-        var match = el.value().match( /^instance\('([^\)]+)'\)/ );
-        return match && match.length ? match[ 1 ] : null;
-    } );
-
-    if ( model && instanceIds && instanceIds.length ) {
-        instanceIds.forEach( function( id ) {
-            if ( id && !model.get( '//xmlns:instance[@id="' + id + '"]', NAMESPACES ) ) {
-                model
-                    .node( 'instance' )
-                    .namespace( NAMESPACES.xmlns )
-                    .attr( {
-                        id: id,
-                        src: 'jr://file-csv/list_name/' + id + '/itemsets.csv'
-                    } );
-            }
-        } );
-    }
-    return xmlDoc;
 }
 
 /**
