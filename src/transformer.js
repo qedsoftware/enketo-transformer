@@ -60,6 +60,7 @@ function transform( survey ) {
 
             delete survey.xform;
             delete survey.media;
+            delete survey.preprocess;
             return survey;
         } );
 }
