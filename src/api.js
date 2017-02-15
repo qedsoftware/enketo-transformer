@@ -31,15 +31,11 @@ router
                     url: req.query.xform
                 } )
                 .then( function( xform ) {
-                    var options = {
+                    return transformer.transform( {
                         xform: xform,
                         theme: req.query.theme,
                         markdown: req.query.markdown !== 'false'
-                    };
-                    if ( req.query.forgive ) {
-                        options.forgive = req.query.forgive;
-                    }
-                    return transformer.transform( options );
+                    } );
                 } )
                 .then( function( result ) {
                     res.json( result );

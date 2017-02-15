@@ -30,6 +30,7 @@ function transform( survey ) {
     return _parseXml( survey.xform )
         .then( function( doc ) {
             if ( typeof survey.preprocess === 'function' ) {
+                console.log( 'preprocessing' );
                 doc = survey.preprocess.call( libxmljs, doc );
             }
             return doc;
@@ -70,14 +71,13 @@ function transform( survey ) {
  * @param  {[type]} xmlDoc libxmljs object of XML document
  * @return {Promise}       libxmljs result document object 
  */
-function _transform( xslStr, xmlDoc, opts ) {
-    opts = typeof opts !== 'object' ? {} : opts;
+function _transform( xslStr, xmlDoc ) {
     return new Promise( function( resolve, reject ) {
         libxslt.parse( xslStr, function( error, stylesheet ) {
             if ( error ) {
                 reject( error );
             } else {
-                stylesheet.apply( xmlDoc, opts, function( error, result ) {
+                stylesheet.apply( xmlDoc, function( error, result ) {
                     if ( error ) {
                         reject( error );
                     } else {
