@@ -23,9 +23,7 @@ var version = _getVersion();
  * @return {Promise}     promise
  */
 function transform( survey ) {
-    var xsltEndTime;
     var xformDoc;
-    var startTime = new Date().getTime();
 
     return _parseXml( survey.xform )
         .then( function( doc ) {
@@ -42,7 +40,7 @@ function transform( survey ) {
         .then( function( htmlDoc ) {
             htmlDoc = _replaceTheme( htmlDoc, survey.theme );
             htmlDoc = _replaceMediaSources( htmlDoc, survey.media );
-            htmlDoc = _replaceLanguageTags( htmlDoc );
+            htmlDoc = _replaceLanguageTags( htmlDoc, survey );
             if ( survey.markdown !== false ) {
                 survey.form = _renderMarkdown( htmlDoc );
             } else {
@@ -184,11 +182,12 @@ function _replaceMediaSources( xmlDoc, mediaMap ) {
  * @param  {[type]} doc libxmljs object
  * @return {[type]}     libxmljs object
  */
-function _replaceLanguageTags( doc ) {
+function _replaceLanguageTags( doc, survey ) {
     var languageElements;
     var languages;
     var langSelectorElement;
     var defaultLang;
+    var map = {};
 
     languageElements = doc.find( '/root/form/select[@id="form-languages"]/option' );
 
@@ -205,6 +204,10 @@ function _replaceLanguageTags( doc ) {
 
     // add or correct dir and value attributes, and amend textcontent of options in language selector
     languageElements.forEach( function( el, index ) {
+        var val = el.attr( 'value' ).value();
+        if ( val && val !== languages[ index ].tag ) {
+            map[ val ] = languages[ index ].tag;
+        }
         el.attr( {
             'data-dir': languages[ index ].dir,
             'value': languages[ index ].tag
@@ -238,6 +241,7 @@ function _replaceLanguageTags( doc ) {
         } );
     }
 
+    survey.languageMap = map;
     return doc;
 }
 
