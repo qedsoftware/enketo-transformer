@@ -58,6 +58,7 @@ function transform( survey ) {
             delete survey.xform;
             delete survey.media;
             delete survey.preprocess;
+            delete survey.markdown;
             return survey;
         } );
 }
