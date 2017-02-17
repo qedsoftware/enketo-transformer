@@ -554,7 +554,7 @@ describe( 'transformer', function() {
                     .node( 'label' )
                     .namespace( NAMESPACES.xmlns )
                     .attr( {
-                        ref: "label" // translate(label) or label[@lang=currentLang()] ?
+                        ref: "translate(label)"
                     } );
 
                 input.replace( select1 );
@@ -616,7 +616,7 @@ describe( 'transformer', function() {
                     expect( selects[ 1 ].getElementsByTagName( 'option' )[ 0 ].getAttribute( 'class' ) ).to.equal( 'itemset-template' ),
                     expect( selects[ 1 ].getElementsByTagName( 'option' )[ 0 ].getAttribute( 'data-items-path' ) ).to.equal( "instance('cities')/root/item[state= /select_one_external/state  and county= /select_one_external/county ]" ),
                     expect( selects[ 1 ].nextSibling.nextSibling.getAttribute( 'class' ) ).to.equal( 'itemset-labels' ),
-                    expect( selects[ 1 ].nextSibling.nextSibling.getAttribute( 'data-label-ref' ) ).to.equal( 'label' ),
+                    expect( selects[ 1 ].nextSibling.nextSibling.getAttribute( 'data-label-ref' ) ).to.equal( 'translate(label)' ),
                     expect( selects[ 1 ].nextSibling.nextSibling.getAttribute( 'data-value-ref' ) ).to.equal( 'name' ),
                 ] );
             } );
